@@ -132,7 +132,7 @@ body {
 }
 
 .toggle-all+label:before {
-  content: 'â¯';
+  content: '❯';
   display: inline-block;
   font-size: 22px;
   color: #949494;
@@ -211,7 +211,7 @@ body {
 }
 
 .todo-list li label {
-  word-break: break-all;
+  overflow-wrap: break-word;
   padding: 15px 15px 15px 60px;
   display: block;
   line-height: 1.2;
@@ -245,7 +245,7 @@ body {
 }
 
 .todo-list li .destroy:after {
-  content: 'Ã—';
+  content: '✖';
   display: block;
   height: 100%;
   line-height: 1.1;

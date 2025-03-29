@@ -16,7 +16,7 @@ function toogleAll(e) {
 const visibility = ref('all');
 function onHashChange() {
   const hash = window.location.hash.replace('#/', ''); // 直接移除#/前缀
-  console.log(hash);
+  // console.log(hash);
   if (['all', 'active', 'completed'].includes(hash)) {
     visibility.value = hash;
     // 在js中使用visibility的时候要用value，es6特性
@@ -68,7 +68,7 @@ function addTodo(e) {
 
 // 6.处理清除
 function clearCompleted() {
-  console.log("here");
+  // console.log("here");
   todos.splice(0, todos.length, ...todos.filter(todo => !todo.completed));
   // ...: 扩展运算符展开过滤后的新数组；拓展展开防止一个引用的数组对象被传递；区分添加一整个数组对象和添加数组对象的元素
 }
@@ -85,7 +85,12 @@ function removeTodo(todo) {
 const left = computed(() => {
   return remaining.value > 1 ? 'lefts' : 'left';
 })
+// vscode折叠快捷键：部分折叠->command+option+[ 全部折叠->command+k command+0
 
+// 9.处理展开
+const showFooter = computed(() => {
+  return todos.length > 0;
+})
 </script>
 
 <template>
@@ -108,7 +113,7 @@ const left = computed(() => {
         </li>
       </ul>
     </section>
-    <footer class="footer">
+    <footer class="footer" v-show="showFooter">
       <span class="todo-count"><strong>{{ remaining }}</strong> item {{ left }}</span>
       <ul class="filters">
         <li>
