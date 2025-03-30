@@ -2,6 +2,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 button {
@@ -51,7 +52,7 @@ body {
     0 2px 4px 0 rgba(0, 0, 0, 0.2),
     /* 上层浅阴影 */
     0 25px 50px 0 rgba(0, 0, 0, 0.1);
-    /* 下层扩散阴影 */
+  /* 下层扩散阴影 */
 }
 
 /* 下面这三个都是统一浏览器placeholder的样式 */
@@ -101,7 +102,8 @@ body {
   color: inherit;
   padding: 6px;
   border: 1px solid #999;
-  box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2); /* 底部阴影 */
+  box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
+  /* 底部阴影 */
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

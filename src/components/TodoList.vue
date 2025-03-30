@@ -21,7 +21,7 @@ function toogleAll(e) {
 const visibility = ref('all');
 function onHashChange() {
   const hash = window.location.hash.replace('#/', ''); // 直接移除#/前缀
-  // console.log(hash);
+  // console.log("here hash=", hash);
   if (['all', 'active', 'completed'].includes(hash)) {
     visibility.value = hash;
     // 在js中使用visibility的时候要用value，es6特性
