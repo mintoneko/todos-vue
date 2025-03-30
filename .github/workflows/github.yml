@@ -16,11 +16,12 @@ jobs:
     - name: 安装依赖和项目打包
       run: |
         npm install
-        npm run build
-
+        npm run build 
 
     - name: 项目部署
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
         folder: dist
+      env:
+        VITE_BASE_PUBLIC: '/todos-vue/'  # 新增环境变量
