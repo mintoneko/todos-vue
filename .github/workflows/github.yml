@@ -1,4 +1,10 @@
+name: 打包todos部署到github pages 
+
 on: push
+
+permissions:
+  contents: write
+
 jobs:
   npm-build:
     name: npm build 工作流
@@ -7,14 +13,14 @@ jobs:
     - name: 读取仓库
       uses: actions/checkout@v3
 
-    - name: 安装依赖
-      run: npm install
+    - name: 安装依赖和项目打包
+      run: |
+        npm install
+        npm run build
 
-    - name: 项目打包
-      run: npm run build
 
-    - name: 上传打包文件
-      uses: actions/upload-artifact@v4
+    - name: 项目部署
+      uses: JamesIves/github-pages-deploy-action@v4
       with:
-        name: build
-        path: dist/
+        branch: gh-pages
+        folder: dist
