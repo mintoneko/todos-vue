@@ -1,10 +1,13 @@
 <script setup>
-import { ref, reactive, computed } from 'vue';
-// 1.处理列表显示数据
-const todos = reactive([
-  { id: 0, title: '测试内容1', completed: true },
-  { id: 1, title: '测试内容2', completed: false }
+import { ref, reactive, computed, nextTick } from 'vue';
+import { watchEffect } from 'vue'
+
+// 1.处理列表显示数据（添加本地存储逻辑）
+const todos = reactive(JSON.parse(localStorage.getItem('todos')) || [
+  { id: 0, title: '测试内容1', completed: true, editing: false },
+  { id: 1, title: '测试内容2', completed: false, editing: false }
 ])
+
 function toogleAll(e) {
   todos.forEach(todo => {
     todo.completed = e.target.checked;
@@ -23,7 +26,7 @@ function onHashChange() {
   }
   else {
     window.location.hash = "#/all";
-    this.visibility = 'all';
+    visibility.value = 'all';
   }
   // 重定向到#/all
 }
@@ -55,10 +58,17 @@ const remaining = computed(() => {
 function addTodo(e) {
   const title = e.target.value.trim();
   if (title) {
+    if (todos.some(todo => todo.title === title)) {
+      alert('该todo已存在');
+      e.target.value = '';
+      return;
+    }
+    // some()、find()、for...of、findIndex()等遍历方法
     const newTodo = {
       id: todos.length,
       title,
-      completed: false
+      completed: false,
+      editing: false
     }
     todos.push(newTodo);
     e.target.value = '';
@@ -91,6 +101,60 @@ const left = computed(() => {
 const showFooter = computed(() => {
   return todos.length > 0;
 })
+
+// 10.处理数据持久化
+watchEffect(() => {
+  localStorage.setItem('todos', JSON.stringify(todos))
+})
+// 借用watchEffect的副作用函数，监听todos的变化，自动更新localStorage
+
+
+// 11.处理编辑
+const oneEditing = ref(false); // 只允许一个todo处于编辑状态
+const editingTodo = ref(null);
+let originalTitle = '';
+
+function editTodo(todo) {
+  if (oneEditing.value) {
+    alert('请先完成当前编辑');
+    return;
+  }
+  oneEditing.value = true;
+  editingTodo.value = todo;
+  originalTitle = todo.title;
+  todo.editing = true;
+
+  // 添加nextTick确保DOM更新后执行：这里设计更深度的vue异步更新知识
+  nextTick(() => {
+    const input = document.querySelector('.edit[autofocus]');
+    input?.focus();
+  });
+}
+
+function doneEdit(todo) {
+  if (!editingTodo.value) return;
+  const title = todo.title.trim();
+  if (title) {
+    if (todos.some(item => item.title === title && item !== todo)) {
+      alert('该todo已存在');
+      todo.title = originalTitle;
+    }
+  } else {
+    removeTodo(todo);
+  }
+  oneEditing.value = false;
+  editingTodo.value = null;
+  originalTitle = '';
+  todo.editing = false;
+}
+
+function cancelEdit(todo) {
+  todo.title = originalTitle;
+  oneEditing.value = false;
+  editingTodo.value = null;
+  originalTitle = '';
+  todo.editing = false;
+}
 </script>
 
 <template>
@@ -103,13 +167,15 @@ const showFooter = computed(() => {
       <input id="toggle-all" class="toggle-all" type="checkbox" @click="toogleAll">
       <label for="toggle-all">Mark all as complete</label>
       <ul class="todo-list">
-        <li v-for="todo in filteredTodos" :key="todo.id" :class="{ completed: todo.completed }">
+        <li v-for="todo in filteredTodos" :key="todo.id" :class="{ completed: todo.completed, editing: todo.editing }">
           <div class="view">
-            <input class="toggle" type="checkbox" v-model="todo.completed"> <!-- 绑定input的checked属性 -->
-            <label>{{ todo.title }}</label>
-            <button class="destroy" @click="removeTodo"></button>
+            <input class="toggle" type="checkbox" v-model="todo.completed">
+            <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
+            <button class="destroy" @click="removeTodo(todo)"></button>
           </div>
-          <input class="edit" value="Create a TodoMVC template">
+          <input class="edit" v-model="todo.title" @keyup.enter="doneEdit(todo)" @keyup.esc="cancelEdit(todo)"
+            @blur="doneEdit(todo)" v-if="todo.editing" autofocus>
+          <!-- 需要与todo绑定，用全局editing会渲染实效 -->
         </li>
       </ul>
     </section>
