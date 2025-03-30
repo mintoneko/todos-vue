@@ -4,7 +4,7 @@ const routes = [
   {
     path: '/date/:id/',
     name: 'weekday',
-    component: () => import('@/components/Test.vue'),
+    component: () => import('@/views/Test.vue'),
   },
   {
     path: '/:catchAll(.*)',

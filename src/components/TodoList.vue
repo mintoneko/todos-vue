@@ -1,14 +1,15 @@
 <script setup>
 import { ref, reactive, computed, nextTick } from 'vue';
-import { watchEffect } from 'vue'
+import { useTodoStore } from '@/store/todo'
 import SetId from '@/utils/SetId';
+import Storage from '@/utils/Storage';
 
+const store = useTodoStore();
+console.log("here store.id=", store.id);
 
 // 1.处理列表显示数据（添加本地存储逻辑）
-const todos = reactive(JSON.parse(localStorage.getItem('todos')) || [
-  { id: SetId.generateId(), title: '测试内容1', completed: true, editing: false },
-  { id: SetId.generateId(), title: '测试内容2', completed: false, editing: false }
-])
+const todos = reactive(Storage.getItemWithExpiration(store.id) || [])
+console.log("here todos=", todos);
 
 function toogleAll(e) {
   todos.forEach(todo => {
@@ -76,6 +77,7 @@ function addTodo(e) {
     e.target.value = '';
   }
   // e是原生DOM事件对象，类型为Event，e.target指向触发事件的元素，即input元素
+  saveToLocalStorage();
 }
 
 // 6.处理清除
@@ -83,6 +85,7 @@ function clearCompleted() {
   // console.log("here");
   todos.splice(0, todos.length, ...todos.filter(todo => !todo.completed));
   // ...: 扩展运算符展开过滤后的新数组；拓展展开防止一个引用的数组对象被传递；区分添加一整个数组对象和添加数组对象的元素
+  saveToLocalStorage();
 }
 // 想要value替换掉todos需要改为ref，这里涉及vue的两种响应式数据类型
 
@@ -90,6 +93,7 @@ function clearCompleted() {
 function removeTodo(todo) {
   const index = todos.indexOf(todo);
   todos.splice(index, 1);
+  saveToLocalStorage();
 }
 // v-for故每个li对应一个todo对象，所以click能够传递
 
@@ -105,11 +109,9 @@ const showFooter = computed(() => {
 })
 
 // 10.处理数据持久化
-watchEffect(() => {
-  localStorage.setItem('todos', JSON.stringify(todos))
-})
-// 借用watchEffect的副作用函数，监听todos的变化，自动更新localStorage
-
+function saveToLocalStorage() {
+  Storage.setItemWithExpiration(store.id,todos);
+}
 
 // 11.处理编辑
 const oneEditing = ref(false); // 只允许一个todo处于编辑状态
@@ -148,6 +150,7 @@ function doneEdit(todo) {
   editingTodo.value = null;
   originalTitle = '';
   todo.editing = false;
+  saveToLocalStorage();
 }
 
 function cancelEdit(todo) {
@@ -157,6 +160,7 @@ function cancelEdit(todo) {
   originalTitle = '';
   todo.editing = false;
 }
+
 </script>
 
 <template>
@@ -171,7 +175,7 @@ function cancelEdit(todo) {
       <ul class="todo-list">
         <li v-for="todo in filteredTodos" :key="todo.id" :class="{ completed: todo.completed, editing: todo.editing }">
           <div class="view">
-            <input class="toggle" type="checkbox" v-model="todo.completed">
+            <input class="toggle" type="checkbox" v-model="todo.completed" @change="saveToLocalStorage">
             <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
             <button class="destroy" @click="removeTodo(todo)"></button>
           </div>
