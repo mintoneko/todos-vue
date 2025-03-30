@@ -17,11 +17,11 @@ jobs:
       run: |
         npm install
         npm run build 
-
+      env:
+        VITE_BASE_PUBLIC: '/todos-vue/'  # 新增构建时环境变量
+      
     - name: 项目部署
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
         folder: dist
-      env:
-        VITE_BASE_PUBLIC: '/todos-vue/'  # 新增环境变量
